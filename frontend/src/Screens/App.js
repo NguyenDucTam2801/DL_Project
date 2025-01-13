@@ -6,9 +6,9 @@ function App() {
 
 
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
+  
 
-  const [hasPrediction, setHasPrediction] = useState(false);
+  const [prediction, setPrediction] = useState('');
 
   const ratio = 1920 / 1080;
 
@@ -35,14 +35,26 @@ function App() {
     getVideo();
   }, [videoRef]);
 
+  useEffect(() => {
+    setPrediction('Loading...');
+    const interval = setInterval(async () => {
+      const imageCapture = new ImageCapture(videoRef.current.srcObject.getVideoTracks()[0]);
+      const image = await imageCapture.grabFrame();
+      const prediction = await getPrediction(image);
+      setPrediction(prediction.prediction);
+    }, 1000);
+    return () => clearInterval(interval);
+  } , [videoRef]);
+
   return (
     <div className="App">
       <div className="camera">
         <video ref={videoRef}></video>
+        <div className='prediction'>
+          {prediction}
       </div>
-      <div className={'prediction' + (hasPrediction ? 'hasPrediction' : '')}>
-        <canvas ref={canvasRef}></canvas>
       </div>
+      
     </div>
   );
 }
