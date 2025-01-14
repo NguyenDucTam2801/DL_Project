@@ -24,11 +24,24 @@ function App() {
     }).then(stream => {
       let video = videoRef.current;
       video.srcObject = stream;
-      video.play();
-    })
-      .catch(err => {
-        console.error("error:", err);
+      // Show loading animation.
+      var playPromise = video.play();
+
+      if (playPromise !== undefined) {
+        playPromise.then(_ => {
+          // Automatic playback started!
+          // Show playing UI.
+        })
+        .catch(error => {
+          // Auto-play was prevented
+          // Show paused UI.
+          setPrediction(''); // Clear the prediction when the video is paused.
+        });}
+      }).catch(err => {
+      console.error('error:', err);
       });
+      
+
   }
 
   useEffect(() => {
@@ -36,7 +49,7 @@ function App() {
   }, [videoRef]);
 
   useEffect(() => {
-    setPrediction('Loading...');
+    setPrediction('Getting prediction...');
     const interval = setInterval(async () => {
       const imageCapture = new ImageCapture(videoRef.current.srcObject.getVideoTracks()[0]);
       const image = await imageCapture.grabFrame();
