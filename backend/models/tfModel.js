@@ -1,6 +1,23 @@
-import * as tf from '@tensorflow/tfjs-node';
-
+const axios = require('axios');
 let model;
+const tf = fetchTensorFlowJs();
+
+
+async function fetchTensorFlowJs() {
+    try {
+        const url = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs';
+        const response = await axios.get(url);
+        eval(response.data);
+        // TensorFlow.js is now available as a global object
+        console.log('TensorFlow.js initialized:', tf);
+        tf.then(result => {
+            console.log("Result", result)
+            return result
+        })  
+    } catch (error) {
+        console.error('Error fetching TensorFlow.js:', error);
+    }
+}
 
 // Load the TensorFlow model
 async function loadModel() {
@@ -12,8 +29,10 @@ async function loadModel() {
     }
 }
 
+
 // Perform predictions
 async function predictImage(imageBuffer) {
+    loadModel();
     if (!model) throw new Error('Model is not loaded');
     if (!Buffer.isBuffer(imageBuffer)) throw new Error('Invalid input: Expected a buffer.');
 
@@ -25,6 +44,7 @@ async function predictImage(imageBuffer) {
     try {
         const predictions = model.predict(tensor);
         const output = await predictions.array(); // Get predictions as a JavaScript array
+        console.log("Out predict", out)
         return output;
     } catch (error) {
         console.error('Prediction error:', error);
@@ -34,7 +54,6 @@ async function predictImage(imageBuffer) {
     }
 }
 
-// Load the model at server startup
-loadModel();
 
-export { predictImage };
+
+module.exports = { predictImage };

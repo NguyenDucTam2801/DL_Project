@@ -1,10 +1,15 @@
-import { predictImage } from '../models/tfModel.js';
+const { predictImage } = require('../models/tfModel');
 
 const processImage = async (req, res) => {
     try {
-        const imageBuffer = req.file.buffer; // Image uploaded as a buffer
-        const predictions = await predictImage(imageBuffer); // Get predictions
-        res.json({ predictions }); // Send predictions back to client
+        try {
+            const predictions = await predictImage(req.body.image);
+            console.log('Predictions:', predictions);
+            res.status(200).json({ predictions });
+        } catch (error) {
+            console.error('Error processing image:', error);
+            res.status(500).send('Error processing image');
+        }
     } catch (error) {
         console.error('Error processing image:', error);
         res.status(500).json({ error: 'Failed to process image' });
@@ -12,4 +17,4 @@ const processImage = async (req, res) => {
     // res.send('Image processed successfully');
 };
 
-export { processImage };
+module.exports = { processImage };

@@ -1,10 +1,9 @@
-import express from 'express';
-import multer from 'multer';
-import path from 'path';
-import { processImage } from './controller/imageController.js';
+const express = require('express');
+const multer = require('multer');
+const { processImage } = require('./controller/imageController');
 
 const app = express();
-const port = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 // app.use(express.static(path.join(__dirname, 'public')));
@@ -17,9 +16,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 app.get('/', (req, res) => {
     res.send('Hello from TensorFlow.js');
 });
-app.post('/upload', upload.single('image'), processImage);
+app.post('/predict',express.raw({ type: 'image/*', limit: '5mb' }) ,upload.single('image'), processImage);
 
 // Start server
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+(async () => {
+    app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+    });
+})();
